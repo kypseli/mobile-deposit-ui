@@ -4,7 +4,7 @@ def mobileDepositUiImage = null
 stage 'build'
 node('docker-cloud') {
     //docker.withServer('tcp://127.0.0.1:1234'){ //run the following steps on this Docker host
-            docker.image('kmadel/maven:3.3.3-jdk-8').inside('-v /data:/data') { //use this image as the build environment
+            docker.image('kmadel/maven:3.3.3-jdk-8').inside() { //use this image as the build environment
                 checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/cloudbees/mobile-deposit-ui.git']]])
                 sh 'mvn -Dmaven.repo.local=/data/mvn/repo clean package'
 
@@ -33,7 +33,7 @@ node('docker-cloud') {
         stage 'deploy to staging'
         mobileDepositUiImage.run("--name mobile-deposit-ui-stage -p 82:8080 --env='constraint:node==beedemo-swarm-master'")
     }
-    docker.image('kmadel/maven:3.3.3-jdk-8').inside('-v /data:/data') {
+    docker.image('kmadel/maven:3.3.3-jdk-8').inside() {
         stage 'functional-test'
         sh 'mvn -Dmaven.repo.local=/data/mvn/repo verify'
     }
