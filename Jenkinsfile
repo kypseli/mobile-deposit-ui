@@ -29,7 +29,7 @@ node('docker-cloud') {
 
     //use withDockerRegistry to make sure we are logged in to docker hub registry
     withDockerRegistry(registry: [credentialsId: 'docker-hub-beedemo']) {
-      mobileDepositApiImage.push()
+      mobileDepositUiImage.push()
     }
     stage 'deploy to staging'
     dockerDeploy("beedemo", 'mobile-deposit-ui', 82, 8080, "$dockerTag")
