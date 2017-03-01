@@ -41,7 +41,7 @@ node('docker-cloud') {
 }
 stage 'awaiting approval'
 //put input step outside of node so it doesn't tie up a slave
-input 'UI Staged at http://52.27.249.236:82/deposit - Proceed with Production Deployment?'
+input 'UI Staged at http://52.40.148.113:82/deposit - Proceed with Production Deployment?'
 stage 'deploy to production'
 node('docker-cloud') {
     docker.withServer('tcp://52.27.249.236:3376', 'beedemo-swarm-cert'){
