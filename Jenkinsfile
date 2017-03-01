@@ -24,7 +24,7 @@ node('docker-cloud') {
     stage 'build docker image'
     def dockerTag = "${env.BUILD_NUMBER}-${short_commit}"
     dir('target') {
-        mobileDepositUiImage = docker.build "mobile-deposit-ui:${dockerTag}"
+        mobileDepositUiImage = docker.build "beedemo/mobile-deposit-ui:${dockerTag}"
     }
 
     //use withDockerRegistry to make sure we are logged in to docker hub registry
