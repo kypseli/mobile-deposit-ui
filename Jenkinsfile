@@ -2,6 +2,12 @@ def dockerBuildTag = 'latest'
 def mobileDepositUiImage = null
 def buildVersion = null
 def short_commit = null
+
+if(env.BRANCH_NAME=="master"){
+    properties([pipelineTriggers(triggers: [[$class: 'DockerHubTrigger', options: [[$class: 'TriggerOnSpecifiedImageNames', repoNames: ['beedemo/mobile-deposit-api'] as Set]]]]),
+                [$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5']]])
+}
+
 stage 'build'
 node('docker-cloud') {
     docker.image('kmadel/maven:3.3.3-jdk-8').inside() { //use this image as the build environment
