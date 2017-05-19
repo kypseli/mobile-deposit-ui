@@ -53,15 +53,5 @@ stage 'awaiting approval'
 input 'UI Staged at http://52.40.148.113:82/deposit - Proceed with Production Deployment?'
 stage 'deploy to production'
 node('docker-cloud') {
-    docker.withServer("${DOCKER_DEPLOY_PROD_HOST}", 'beedemo-swarm-cert'){
-        try{
-            sh "docker stop mobile-deposit-ui"
-            sh "docker rm mobile-deposit-ui"
-        } catch (Exception _) {
-            echo "no container to stop"
-        }
-        mobileDepositUiImage.run("--name mobile-deposit-ui -p 80:8080 --env='constraint:node==beedemo-swarm-master'")
-        //sh 'curl http://webhook:58f11cf04cecbe5633031217794eda89@jenkins.beedemo.net/mobile-team/docker-traceability/submitContainerStatus --data-urlencode inspectData="$(docker inspect mobile-deposit-ui)"'
-    }
-
+    dockerDeploy("docker-cloud","${DOCKER_HUB_USER}", 'mobile-deposit-ui', 80, 8080, "$dockerTag")
 }
