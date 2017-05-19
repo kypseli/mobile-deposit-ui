@@ -53,5 +53,6 @@ stage 'awaiting approval'
 input 'UI Staged at http://52.40.148.113:82/deposit - Proceed with Production Deployment?'
 stage 'deploy to production'
 node('docker-cloud') {
+    def dockerTag = "${env.BUILD_NUMBER}-${short_commit}"
     dockerDeploy("docker-cloud","${DOCKER_HUB_USER}", 'mobile-deposit-ui', 80, 8080, "$dockerTag")
 }
