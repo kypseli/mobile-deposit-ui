@@ -38,7 +38,7 @@ node('docker-cloud') {
       mobileDepositUiImage.push()
     }
     stage 'deploy to staging'
-    dockerDeploy("beedemo", 'mobile-deposit-ui', 82, 8080, "$dockerTag")
+    dockerDeploy("docker-cloud","${DOCKER_HUB_USER}", 'mobile-deposit-ui', 82, 8080, "$dockerTag")
 
     docker.image('kmadel/maven:3.3.3-jdk-8').inside() {
         stage 'functional-test'
