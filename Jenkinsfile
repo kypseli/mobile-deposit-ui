@@ -53,7 +53,7 @@ stage 'awaiting approval'
 input 'UI Staged at http://52.40.148.113:82/deposit - Proceed with Production Deployment?'
 stage 'deploy to production'
 node('docker-cloud') {
-    docker.withServer('tcp://52.27.249.236:3376', 'beedemo-swarm-cert'){
+    docker.withServer("${DOCKER_DEPLOY_PROD_HOST}", 'beedemo-swarm-cert'){
         try{
             sh "docker stop mobile-deposit-ui"
             sh "docker rm mobile-deposit-ui"
