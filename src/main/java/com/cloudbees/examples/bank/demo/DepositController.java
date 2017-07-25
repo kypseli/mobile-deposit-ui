@@ -17,11 +17,15 @@ public class DepositController {
 	@Value("${api.port}")
 	private String apiPort;
 
+	@Value("${version}")
+	private String version;
+
 	@RequestMapping("/deposit")
 	public String deposit(Model model) {
 		model.addAttribute("apiProto", apiProto);
 		model.addAttribute("apiHost", apiHost);
 		model.addAttribute("apiPort", apiPort);
+		model.addAttribute("version", version);
 
 		return "deposit";
 	}
