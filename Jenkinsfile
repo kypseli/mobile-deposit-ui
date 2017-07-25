@@ -50,9 +50,10 @@ node('docker-cloud') {
 }
 stage 'awaiting approval'
 //put input step outside of node so it doesn't tie up a slave
-input 'UI Staged at http://52.40.148.113:82/deposit - Proceed with Production Deployment?'
+input 'UI Staged at http://bank.beedemo.net:82/deposit - Proceed with Production Deployment?'
 stage 'deploy to production'
 node('docker-cloud') {
     def dockerTag = "${env.BUILD_NUMBER}-${short_commit}"
     dockerDeploy("docker-cloud","${DOCKER_HUB_USER}", 'mobile-deposit-ui', 80, 8080, "$dockerTag")
+    hipchatSend color: 'GREEN', message: "${env.JOB_NAME} deployed to http://bank.beedemo.net/deposit", room: '1613593', v2enabled: true
 }
