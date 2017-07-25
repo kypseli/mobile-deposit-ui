@@ -18,7 +18,7 @@ node('docker-cloud') {
         sh('git rev-parse HEAD > GIT_COMMIT')
         git_commit=readFile('GIT_COMMIT')
         short_commit=git_commit.take(7)
-        sh 'mvn -Dmaven.repo.local=/data/mvn/repo clean package'
+        sh 'mvn -Dmaven.repo.local=/data/mvn/repo -DGIT_COMMIT="${SHORT_COMMIT}" -DBUILD_NUMBER=${BUILD_NUMBER} -DBUILD_URL=${BUILD_URL} clean package'
 
         //get new version of application from pom
         def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
