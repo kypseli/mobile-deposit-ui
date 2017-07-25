@@ -49,8 +49,13 @@ node('docker-cloud') {
     }
 }
 stage 'awaiting approval'
-//put input step outside of node so it doesn't tie up a slave
-input 'UI Staged at http://bank.beedemo.net:82/deposit - Proceed with Production Deployment?'
+
+//wrap input steps with timeouts
+timeout(time: 10, unit: 'MINUTES') {
+    slackSend(color: "warning", message: "${env.JOB_NAME} awaiting approval at: ${env.RUN_DISPLAY_URL}")
+    //put input step outside of node so it doesn't tie up a slave
+    input 'UI Staged at http://bank.beedemo.net:82/deposit - Proceed with Production Deployment?'
+}
 stage 'deploy to production'
 node('docker-cloud') {
     def dockerTag = "${env.BUILD_NUMBER}-${short_commit}"
