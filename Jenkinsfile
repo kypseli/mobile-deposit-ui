@@ -12,7 +12,7 @@ if(env.BRANCH_NAME=="master"){
 }
 
 
-node('docker-compose') {
+node('dind-compose') {
     checkout scm
     stage('build') {
         sh('git rev-parse HEAD > GIT_COMMIT')

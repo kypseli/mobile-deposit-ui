@@ -86,7 +86,6 @@ public class MobileDepositFunctionalTests  {
 	@Test
 	public void hasAnAccountNumber() throws Exception {
 		String depositUrl = "http://" + testHost + ":" + port + "/deposit/";
-		//String depositUrl = "http://bank.beedemo.net:82/deposit/";
 		System.out.println("depositUrl: " + depositUrl);
 		driver.get(depositUrl);
 		assertNotNull(driver.findElement(By.className("version")));
