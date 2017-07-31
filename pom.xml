@@ -9,7 +9,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>1.2.4.RELEASE</version>
+    <version>1.4.0.RELEASE</version>
   </parent>
   <name>mobile-deposit-ui</name>
   <url>http://maven.apache.org</url>
@@ -30,13 +30,7 @@
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
       <artifactId>selenium-java</artifactId>
-      <version>2.43.0</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.saucelabs</groupId>
-      <artifactId>sauce_junit</artifactId>
-      <version>[1.0.0,)</version>
+      <version>3.4.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -54,6 +48,11 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-test</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -88,34 +87,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <groups>com.cloudbees.examples.bank.demo.UnitTest</groups>
-        </configuration>
-      </plugin>
-      <!-- <plugin> <groupId>com.saucelabs.maven.plugin</groupId> <artifactId>sauce-connect-plugin</artifactId> 
-        <version>2.1.3</version> <configuration> <sauceUsername>cb_cloudbees-sa</sauceUsername> 
-        <sauceAccessKey>0ce882ef-06c4-4439-8b50-09027e4dd6d7</sauceAccessKey> </configuration> 
-        <executions> <execution> <id>start-sauceconnct</id> <phase>pre-integration-test</phase> 
-        <goals> <goal>start-sauceconnect</goal> </goals> </execution> <execution> 
-        <id>stop-sauceconnect</id> <phase>post-integration-test</phase> <goals> <goal>stop-sauceconnect</goal> 
-        </goals> </execution> </executions> </plugin> -->
     </plugins>
   </build>
-  <!-- <repositories> <repository> <id>saucelabs-repository</id> <url>http://repository-saucelabs.forge.cloudbees.com/release</url> 
-    <releases> <enabled>true</enabled> </releases> <snapshots> <enabled>true</enabled> 
-    </snapshots> </repository> </repositories> <pluginRepositories> <pluginRepository> 
-    <id>saucelabs-repository</id> <url>http://repository-saucelabs.forge.cloudbees.com/release</url> 
-    <releases> <enabled>true</enabled> </releases> <snapshots> <enabled>true</enabled> 
-    </snapshots> </pluginRepository> </pluginRepositories> -->
 </project>

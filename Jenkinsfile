@@ -28,24 +28,35 @@ node('docker-cloud') {
         }
         matcher = null
     }
+}
+node('dind-compose') {
+    stage('functional-test') {
+        try {
+            sh 'docker-compose up'
+            sh 'docker run -it --rm -p 8081:8081 --name deposit-ui -v "$PWD":/usr/src/mobile-deposit-ui -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn verify -DargLine="-Dserver.port=8081"'
 
-    //build image and deploy to staging
-    stage 'build docker image'
+        } catch(x) {
+
+        } finally {
+            sh 'docker-compose down'
+        }
+    }
+
+    //docker tag to be used for build, push and run
     def dockerTag = "${env.BUILD_NUMBER}-${short_commit}"
-    dir('target') {
-        mobileDepositUiImage = docker.build "beedemo/mobile-deposit-ui:${dockerTag}"
+    //build image and deploy to staging
+    stage('build docker image') {
+        dir('target') {
+            mobileDepositUiImage = docker.build "beedemo/mobile-deposit-ui:${dockerTag}"
+        }
     }
 
-    //use withDockerRegistry to make sure we are logged in to docker hub registry
-    withDockerRegistry(registry: [credentialsId: 'docker-hub-beedemo']) {
-      mobileDepositUiImage.push()
-    }
-    stage 'deploy to staging'
-    dockerDeploy("docker-cloud","${DOCKER_HUB_USER}", 'mobile-deposit-ui', 82, 8080, "$dockerTag")
-
-    docker.image('kmadel/maven:3.3.3-jdk-8').inside() {
-        stage 'functional-test'
-        sh 'mvn -Dmaven.repo.local=/data/mvn/repo verify'
+    stage('deploy to staging') {
+        //use withDockerRegistry to make sure we are logged in to docker hub registry
+        withDockerRegistry(registry: [credentialsId: 'docker-hub-beedemo']) {
+          mobileDepositUiImage.push()
+        }
+        dockerDeploy("docker-cloud","${DOCKER_HUB_USER}", 'mobile-deposit-ui', 82, 8080, "$dockerTag")
     }
 }
 stage 'awaiting approval'
