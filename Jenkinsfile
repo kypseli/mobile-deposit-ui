@@ -27,9 +27,11 @@ node('docker-cloud') {
             echo "Released version ${buildVersion}"
         }
         matcher = null
+        stash name: 'work', includes: '**/*'
     }
 }
 node('dind-compose') {
+    unstash 'work'
     stage('functional-test') {
         try {
             sh 'docker-compose up'
