@@ -3,7 +3,6 @@ services:
   selenoid:
     image: "aerokube/selenoid:latest"
     network_mode: bridge
-    container_name: selenoid
     ports:
       - "4444:4444"
     volumes:
