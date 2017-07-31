@@ -11,27 +11,25 @@ if(env.BRANCH_NAME=="master"){
                 [$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5']]])
 }
 
-stage 'build'
-node('docker-cloud') {
-    docker.image('kmadel/maven:3.3.3-jdk-8').inside() { //use this image as the build environment
-        checkout scm
-        sh('git rev-parse HEAD > GIT_COMMIT')
-        git_commit=readFile('GIT_COMMIT')
-        short_commit=git_commit.take(7)
-        sh 'mvn -Dmaven.repo.local=/data/mvn/repo clean package -DskipTests'
 
-        //get new version of application from pom
-        def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
-        if (matcher) {
-            buildVersion = matcher[0][1]
-            echo "Released version ${buildVersion}"
-        }
-        matcher = null
-        stash name: 'work', includes: '**/*'
-    }
-}
 node('dind-compose') {
-    unstash 'work'
+    checkout scm
+    stage('build') {
+        docker.image('kmadel/maven:3.3.3-jdk-8').inside() { //use this image as the build environment
+            sh('git rev-parse HEAD > GIT_COMMIT')
+            git_commit=readFile('GIT_COMMIT')
+            short_commit=git_commit.take(7)
+            sh 'mvn -Dmaven.repo.local=/data/mvn/repo clean package -DskipTests'
+
+            //get new version of application from pom
+            def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
+            if (matcher) {
+                buildVersion = matcher[0][1]
+                echo "Released version ${buildVersion}"
+            }
+            matcher = null
+        }
+    }
     stage('functional-test') {
         try {
             sh 'docker-compose up'
@@ -43,7 +41,6 @@ node('dind-compose') {
             sh 'docker-compose down'
         }
     }
-
     //docker tag to be used for build, push and run
     def dockerTag = "${env.BUILD_NUMBER}-${short_commit}"
     //build image and deploy to staging
