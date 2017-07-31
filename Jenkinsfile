@@ -12,7 +12,7 @@ if(env.BRANCH_NAME=="master"){
 }
 
 
-node('dind-compose') {
+node('docker-compose') {
     checkout scm
     stage('build') {
         sh('git rev-parse HEAD > GIT_COMMIT')
@@ -32,9 +32,9 @@ node('dind-compose') {
         try {
             sh 'docker-compose up'
             sh 'docker run -i --rm -p 8081:8081 --name deposit-ui -v "$PWD":/usr/src/mobile-deposit-ui -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dserver.port=8081"'
-
         } catch(x) {
-
+            //error
+            throw x
         } finally {
             sh 'docker-compose down'
         }
