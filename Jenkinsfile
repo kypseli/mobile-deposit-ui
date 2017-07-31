@@ -15,20 +15,18 @@ if(env.BRANCH_NAME=="master"){
 node('dind-compose') {
     checkout scm
     stage('build') {
-        docker.image('kmadel/maven:3.3.3-jdk-8').inside() { //use this image as the build environment
-            sh('git rev-parse HEAD > GIT_COMMIT')
-            git_commit=readFile('GIT_COMMIT')
-            short_commit=git_commit.take(7)
-            sh 'mvn -Dmaven.repo.local=/data/mvn/repo clean package -DskipTests'
+        sh('git rev-parse HEAD > GIT_COMMIT')
+        git_commit=readFile('GIT_COMMIT')
+        short_commit=git_commit.take(7)
+        sh 'docker run -it --rm -v "$PWD":/usr/src/mobile-deposit-ui -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo clean package -DskipTests'
 
-            //get new version of application from pom
-            def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
-            if (matcher) {
-                buildVersion = matcher[0][1]
-                echo "Released version ${buildVersion}"
-            }
-            matcher = null
+        //get new version of application from pom
+        def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
+        if (matcher) {
+            buildVersion = matcher[0][1]
+            echo "Released version ${buildVersion}"
         }
+        matcher = null
     }
     stage('functional-test') {
         try {
