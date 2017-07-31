@@ -18,7 +18,7 @@ node('dind-compose') {
         sh('git rev-parse HEAD > GIT_COMMIT')
         git_commit=readFile('GIT_COMMIT')
         short_commit=git_commit.take(7)
-        sh 'docker run -it --rm -v "$PWD":/usr/src/mobile-deposit-ui -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo clean package -DskipTests'
+        sh 'docker run -i --rm -v "$PWD":/usr/src/mobile-deposit-ui -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo clean package -DskipTests'
 
         //get new version of application from pom
         def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
@@ -31,7 +31,7 @@ node('dind-compose') {
     stage('functional-test') {
         try {
             sh 'docker-compose up'
-            sh 'docker run -it --rm -p 8081:8081 --name deposit-ui -v "$PWD":/usr/src/mobile-deposit-ui -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dserver.port=8081"'
+            sh 'docker run -i --rm -p 8081:8081 --name deposit-ui -v "$PWD":/usr/src/mobile-deposit-ui -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dserver.port=8081"'
 
         } catch(x) {
 
