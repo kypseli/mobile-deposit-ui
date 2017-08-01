@@ -53,7 +53,7 @@ node('docker-compose') {
     //build image and deploy to staging
     stage('build docker image') {
         dir('target') {
-            mobileDepositUiImage = docker.build "beedemo/mobile-deposit-ui:${dockerTag}"
+            mobileDepositUiImage = docker.build "beedemo/mobile-deposit-ui-stage:${dockerTag}"
         }
     }
 
@@ -78,6 +78,11 @@ if(env.BRANCH_NAME=="master") {//only deploy master branch to prod
     stage('deploy to production') {
         node('docker-cloud') {
             def dockerTag = "${env.BUILD_NUMBER}-${short_commit}"
+            sh "docker tag beedemo/mobile-deposit-ui-stage:${dockerTag} beedemo/mobile-deposit-ui:${dockerTag}"
+            //use withDockerRegistry to make sure we are logged in to docker hub registry
+            withDockerRegistry(registry: [credentialsId: 'docker-hub-beedemo']) {
+              sh "docker push beedemo/mobile-deposit-ui:${dockerTag}"
+            }
             dockerDeploy("docker-cloud","${DOCKER_HUB_USER}", 'mobile-deposit-ui', 80, 8080, "$dockerTag")
         }
     }
