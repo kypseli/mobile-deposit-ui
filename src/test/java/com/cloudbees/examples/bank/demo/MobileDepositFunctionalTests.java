@@ -35,6 +35,12 @@ public class MobileDepositFunctionalTests  {
     @Value("${test.host}")
     private String testHost;
 
+    @Value("${test.browser.name}")
+    private String testBrowserName;
+
+    @Value("${test.browser.version}")
+    private String testBrowserVersion;
+
 
 	/**
 	 * Represents the browser to be used as part of the test run.
@@ -70,8 +76,8 @@ public class MobileDepositFunctionalTests  {
 	public void setUp() throws Exception {
         System.out.println("testHost: " + testHost);
 		DesiredCapabilities browser = new DesiredCapabilities();
-		browser.setBrowserName("firefox");
-		browser.setVersion("46.0");
+		browser.setBrowserName(testBrowserName);
+		browser.setVersion(testBrowserVersion);
 		driver = new RemoteWebDriver(
 				URI.create("http://" + testHost + ":4444/wd/hub").toURL(),
 				browser
@@ -86,9 +92,8 @@ public class MobileDepositFunctionalTests  {
 	@Test
 	public void hasAnAccountNumber() throws Exception {
 		String depositUrl = "http://" + testHost + ":" + port + "/deposit/";
-		System.out.println("depositUrl: " + depositUrl);
 		driver.get(depositUrl);
-		assertNotNull(driver.findElement(By.className("version")));
+		assertNotNull(driver.findElement(By.className("account-number")));
 	}
 
 	// @Test

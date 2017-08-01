@@ -5,8 +5,20 @@
       "46.0": {
         "image": "selenoid/firefox:46.0",
         "port": "4444",
-        "tmpfs": {"/tmp": "size=512m"},
+        "tmpfs": {"/tmp": "size=256m"},
         "path" : "/wd/hub",
+        "volumes" : ["/to:/from:ro"]
+      }
+    }
+  },
+  "chrome": {
+    "default": "59.0",
+    "versions": {
+      "59.0": {
+        "image": "selenoid/chrome:59.0",
+        "port": "4444",
+        "tmpfs": {"/tmp": "size=256m"},
+        "path" : "/",
         "volumes" : ["/to:/from:ro"]
       }
     }

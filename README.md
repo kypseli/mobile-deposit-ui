@@ -4,11 +4,17 @@
 spring run app.groovy
 ```
 
-Aside from standard Spring boot properties (eg: `--server.port=8081`), the following custom properties are supported:
+Aside from standard Spring boot properties (eg: `--server.port=8081`), the following custom run properties are supported:
 
 * `api.host` - configures the domain to send the API request
 * `api.proto` - configures the protocol to send the API request
 * `api.port` - configures the port to send the API request
+
+And test properties:
+
+* `test.host` - configures host name or IP for selenoid hub to access test ui
+* `test.browser.name` - configures browser name to run functional tests
+* `test.browser.version` - configures browser version to run functional tests
 
 Per [Spring boot convention](http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html), the custom properties can be set a number of ways.
 

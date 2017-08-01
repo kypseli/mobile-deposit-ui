@@ -32,7 +32,14 @@ node('docker-compose') {
         try {
             sh 'docker pull selenoid/firefox:46.0'
             sh 'docker-compose up -d'
-            sh 'docker run -i --rm -p 8081:8081 -v "$PWD":/usr/src/mobile-deposit-ui -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.host=172.17.0.1 -Dserver.port=8081"'
+            parallel(
+                "firefox": {
+                    sh 'docker run -i --rm -p 8081:8081 -v "$PWD":/usr/src/mobile-deposit-ui -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.host=172.17.0.1 -Dtest.browser.name=firefox -Dtest.browser.version=46.0 -Dserver.port=8081"'
+                },
+                "chrome": {
+                    sh 'docker run -i --rm -p 8081:8081 -v "$PWD":/usr/src/mobile-deposit-ui -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.host=172.17.0.1 -Dtest.browser.name=chrome -Dtest.browser.version=59.0 -Dserver.port=8081"'
+                }
+            )
         } catch(x) {
             //error
             throw x
