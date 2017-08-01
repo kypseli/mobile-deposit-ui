@@ -19,7 +19,8 @@
                    $('.account-number').append(data.accountNumber);
                    $('.name').append(data.name);
                    $('.balance').append(data.balance);
-                   $('.version').append(data.version);
+                   $('.api-version').append(data.version);
+                   $('.version').append(/*[[${version}]]*/);
                 });
             });
         </script>
@@ -60,7 +61,7 @@
             <div class="ui-body ui-body-a ui-corner-all">
                         <p>API Version Details:</p>
                         <ul>
-                        <li class="version"></li>
+                        <li class="api-version"></li>
                         </ul>
             </div>    
             </div><!-- /content -->

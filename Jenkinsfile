@@ -18,6 +18,7 @@ node('docker-compose') {
         sh('git rev-parse HEAD > GIT_COMMIT')
         git_commit=readFile('GIT_COMMIT')
         short_commit=git_commit.take(7)
+      
         sh 'docker run -i --rm -v "$PWD":/usr/src/mobile-deposit-ui -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo clean package -DskipTests'
 
         //get new version of application from pom
