@@ -62,14 +62,23 @@ node('docker-compose') {
         withDockerRegistry(registry: [credentialsId: 'docker-hub-beedemo']) {
           mobileDepositUiImage.push()
         }
-        dockerDeploy("docker-cloud","${DOCKER_HUB_USER}", 'mobile-deposit-ui', 82, 8080, "$dockerTag")
+        dockerDeploy("docker-cloud","${DOCKER_HUB_USER}", 'mobile-deposit-ui-stage', 82, 8080, "$dockerTag")
     }
 }
-stage 'awaiting approval'
-//put input step outside of node so it doesn't tie up a slave
-input 'UI Staged at http://52.40.148.113:82/deposit - Proceed with Production Deployment?'
-stage 'deploy to production'
-node('docker-cloud') {
-    def dockerTag = "${env.BUILD_NUMBER}-${short_commit}"
-    dockerDeploy("docker-cloud","${DOCKER_HUB_USER}", 'mobile-deposit-ui', 80, 8080, "$dockerTag")
+
+
+stage('awaiting approval') {
+    //put input step outside of node so it doesn't tie up a slave
+    timeout(time: 10, unit: 'MINUTES') {
+        input 'UI Staged at http://bank.beedemo.net:82/deposit - Proceed with Production Deployment?'
+    }
+}
+
+if(env.BRANCH_NAME=="master") {//only deploy master branch to prod
+    stage('deploy to production') {
+        node('docker-cloud') {
+            def dockerTag = "${env.BUILD_NUMBER}-${short_commit}"
+            dockerDeploy("docker-cloud","${DOCKER_HUB_USER}", 'mobile-deposit-ui', 80, 8080, "$dockerTag")
+        }
+    }
 }
