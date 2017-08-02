@@ -18,7 +18,7 @@ node('docker-compose') {
     stage('build') {
         gitShortCommit(7)
       
-        sh "docker run -i --rm -v \\"$PWD\\":/usr/src/mobile-deposit-ui -v /data:/data -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo clean package -DskipTests -DGIT_COMMIT='${SHORT_COMMIT}' -DBUILD_NUMBER=${BUILD_NUMBER} -DBUILD_URL=${BUILD_URL}"
+        sh """"docker run -i --rm -v "$PWD":/usr/src/mobile-deposit-ui -v /data:/data -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo clean package -DskipTests -DGIT_COMMIT="${SHORT_COMMIT}" -DBUILD_NUMBER=${BUILD_NUMBER} -DBUILD_URL=${BUILD_URL}"""
 
         //get new version of application from pom
         def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
@@ -33,12 +33,17 @@ node('docker-compose') {
             sh 'docker-compose up -d'
             parallel(
                 "firefox": {
+                    sh 'docker pull selenoid/firefox:54.0'
+                    sh 'docker run -i --rm -p 8081:8081 -v "$PWD":/usr/src/mobile-deposit-ui -v /data:/data  -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.browser.name=firefox -Dtest.browser.version=54.0 -Dserver.port=8081"'
+                },
+
+                "firefox-old": {
                     sh 'docker pull selenoid/firefox:46.0'
-                    sh 'docker run -i --rm -p 8081:8081 -v "$PWD":/usr/src/mobile-deposit-ui -v /data:/data  -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.browser.name=firefox -Dtest.browser.version=46.0 -Dserver.port=8081"'
+                    sh 'docker run -i --rm -p 8082:8082 -v "$PWD":/usr/src/mobile-deposit-ui -v /data:/data  -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.browser.name=firefox -Dtest.browser.version=46.0 -Dserver.port=8082"'
                 },
                 "chrome": {
                     sh 'docker pull selenoid/chrome:59.0'
-                    sh 'docker run -i --rm -p 8082:8082 -v "$PWD":/usr/src/mobile-deposit-ui -v /data:/data  -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.browser.name=chrome -Dtest.browser.version=59.0 -Dserver.port=8082"'
+                    sh 'docker run -i --rm -p 8083:8083 -v "$PWD":/usr/src/mobile-deposit-ui -v /data:/data  -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.browser.name=chrome -Dtest.browser.version=59.0 -Dserver.port=8083"'
                 }, failFast: true
             )
             junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
