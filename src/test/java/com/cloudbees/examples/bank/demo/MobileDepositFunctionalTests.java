@@ -1,10 +1,12 @@
 package com.cloudbees.examples.bank.demo;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.By;
+import org.openqa.selenium.OutputType;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -13,6 +15,7 @@ import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.io.File;
 import java.net.URI;
 
 import static org.junit.Assert.assertNotNull;
@@ -94,6 +97,8 @@ public class MobileDepositFunctionalTests  {
 		String depositUrl = "http://" + testHost + ":" + port + "/deposit/";
 		driver.get(depositUrl);
 		assertNotNull(driver.findElement(By.className("account-number")));
+        File screenshot = driver.getScreenshotAs(OutputType.FILE);
+        FileUtils.copyFile(screenshot, new File("./screenshot-hasAnAccountNumber-" + testBrowserName + "-" + testBrowserVersion + ".png"));
 	}
 
 	// @Test
