@@ -6,7 +6,6 @@
         "image": "selenoid/firefox:54.0",
         "port": "4444",
         "tmpfs": {"/tmp": "size=256m"},
-        "path" : "/wd/hub",
         "volumes" : ["/to:/from:ro"]
       },
       "46.0": {
