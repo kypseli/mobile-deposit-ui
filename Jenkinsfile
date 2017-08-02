@@ -35,11 +35,11 @@ node('docker-compose') {
             parallel(
                 "firefox": {
                     sh 'docker pull selenoid/firefox:46.0'
-                    sh 'docker run -i --rm -p 8081:8081 -v "$PWD":/usr/src/mobile-deposit-ui -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.host=172.17.0.1 -Dtest.browser.name=firefox -Dtest.browser.version=46.0 -Dserver.port=8081"'
+                    sh 'docker run -i --rm -p 8081:8081 -v "$PWD":/usr/src/mobile-deposit-ui -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.browser.name=firefox -Dtest.browser.version=46.0 -Dserver.port=8081"'
                 },
                 "chrome": {
                     sh 'docker pull selenoid/chrome:59.0'
-                    sh 'docker run -i --rm -p 8082:8082 -v "$PWD":/usr/src/mobile-deposit-ui -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.host=172.17.0.1 -Dtest.browser.name=chrome -Dtest.browser.version=59.0 -Dserver.port=8082"'
+                    sh 'docker run -i --rm -p 8082:8082 -v "$PWD":/usr/src/mobile-deposit-ui -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.browser.name=chrome -Dtest.browser.version=59.0 -Dserver.port=8082"'
                 }, failFast: true
             )
             junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
@@ -69,15 +69,15 @@ node('docker-compose') {
     }
 }
 
-
-stage('awaiting approval') {
-    //put input step outside of node so it doesn't tie up a slave
-    timeout(time: 10, unit: 'MINUTES') {
-        input 'UI Staged at http://bank.beedemo.net:82/deposit - Proceed with Production Deployment?'
-    }
-}
-
 if(env.BRANCH_NAME=="master") {//only deploy master branch to prod
+
+    stage('awaiting approval') {
+        //put input step outside of node so it doesn't tie up a slave
+        timeout(time: 10, unit: 'MINUTES') {
+            input 'UI Staged at http://bank.beedemo.net:82/deposit - Proceed with Production Deployment?'
+        }
+    }
+
     stage('deploy to production') {
         node('docker-cloud') {
             def dockerTag = "${env.BUILD_NUMBER}-${short_commit}"
