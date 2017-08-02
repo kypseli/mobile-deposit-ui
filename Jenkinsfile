@@ -18,7 +18,7 @@ node('docker-compose') {
     stage('build') {
         gitShortCommit(7)
       
-        sh "docker run -i --rm -v \"$PWD\":/usr/src/mobile-deposit-ui -v /data:/data -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo clean package -DskipTests -DGIT_COMMIT='${SHORT_COMMIT}' -DBUILD_NUMBER=${BUILD_NUMBER} -DBUILD_URL=${BUILD_URL}"
+        sh "docker run -i --rm -v \\"$PWD\\":/usr/src/mobile-deposit-ui -v /data:/data -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo clean package -DskipTests -DGIT_COMMIT='${SHORT_COMMIT}' -DBUILD_NUMBER=${BUILD_NUMBER} -DBUILD_URL=${BUILD_URL}"
 
         //get new version of application from pom
         def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
@@ -55,7 +55,7 @@ node('docker-compose') {
     //build image and deploy to staging
     stage('build docker image') {
         dir('target') {
-            mobileDepositUiImage = docker.build "beedemo/mobile-deposit-ui-stage:${dockerTag}"
+            mobileDepositUiImage = docker.build("beedemo/mobile-deposit-ui-stage:${dockerTag}", "--build-arg COMMIT_SHA=${SHORT_COMMIT}")
         }
     }
 
