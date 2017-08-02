@@ -42,6 +42,8 @@ node('docker-compose') {
                     sh 'docker run -i --rm -p 8082:8082 -v "$PWD":/usr/src/mobile-deposit-ui -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.host=172.17.0.1 -Dtest.browser.name=chrome -Dtest.browser.version=59.0 -Dserver.port=8082"'
                 }, failFast: true
             )
+            junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
+            archive "screenshot*.png"
         } catch(x) {
             //error
             throw x
