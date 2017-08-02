@@ -33,8 +33,8 @@ node('docker-compose') {
             sh 'docker-compose up -d'
             parallel(
                 "firefox": {
-                    sh 'docker pull selenoid/firefox:54.0'
-                    sh 'docker run -i --rm -p 8081:8081 -v "$PWD":/usr/src/mobile-deposit-ui -v /data:/data  -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.browser.name=firefox -Dtest.browser.version=54.0 -Dserver.port=8081"'
+                    sh 'docker pull selenoid/firefox:50.0'
+                    sh 'docker run -i --rm -p 8081:8081 -v "$PWD":/usr/src/mobile-deposit-ui -v /data:/data  -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.browser.name=firefox -Dtest.browser.version=50.0 -Dserver.port=8081"'
                 },
 
                 "firefox-old": {
