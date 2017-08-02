@@ -2,6 +2,7 @@ def dockerBuildTag = 'latest'
 def mobileDepositUiImage = null
 def buildVersion = null
 def short_commit = null
+def dockerTag = null
 
 env.DOCKER_HUB_USER = 'beedemo'
 env.DOCKER_CREDENTIAL_ID = 'docker-hub-beedemo'
@@ -15,11 +16,9 @@ if(env.BRANCH_NAME=="master"){
 node('docker-compose') {
     checkout scm
     stage('build') {
-        sh('git rev-parse HEAD > GIT_COMMIT')
-        git_commit=readFile('GIT_COMMIT')
-        short_commit=git_commit.take(7)
+        gitShortCommit(7)
       
-        sh 'docker run -i --rm -v "$PWD":/usr/src/mobile-deposit-ui -v /data:/data -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo clean package -DskipTests'
+        sh "docker run -i --rm -v ${WORKSPACE}:/usr/src/mobile-deposit-ui -v /data:/data -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo clean package -DskipTests -DGIT_COMMIT='${SHORT_COMMIT}' -DBUILD_NUMBER=${BUILD_NUMBER} -DBUILD_URL=${BUILD_URL}"
 
         //get new version of application from pom
         def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
@@ -34,12 +33,17 @@ node('docker-compose') {
             sh 'docker-compose up -d'
             parallel(
                 "firefox": {
+                    sh 'docker pull selenoid/firefox:50.0'
+                    sh 'docker run -i --rm -p 8081:8081 -v "$PWD":/usr/src/mobile-deposit-ui -v /data:/data  -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.browser.name=firefox -Dtest.browser.version=50.0 -Dserver.port=8081"'
+                },
+
+                "firefox-old": {
                     sh 'docker pull selenoid/firefox:46.0'
-                    sh 'docker run -i --rm -p 8081:8081 -v "$PWD":/usr/src/mobile-deposit-ui -v /data:/data  -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.browser.name=firefox -Dtest.browser.version=46.0 -Dserver.port=8081"'
+                    sh 'docker run -i --rm -p 8082:8082 -v "$PWD":/usr/src/mobile-deposit-ui -v /data:/data  -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.browser.name=firefox -Dtest.browser.version=46.0 -Dserver.port=8082"'
                 },
                 "chrome": {
                     sh 'docker pull selenoid/chrome:59.0'
-                    sh 'docker run -i --rm -p 8082:8082 -v "$PWD":/usr/src/mobile-deposit-ui -v /data:/data  -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.browser.name=chrome -Dtest.browser.version=59.0 -Dserver.port=8082"'
+                    sh 'docker run -i --rm -p 8083:8083 -v "$PWD":/usr/src/mobile-deposit-ui -v /data:/data  -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.browser.name=chrome -Dtest.browser.version=59.0 -Dserver.port=8083"'
                 }, failFast: true
             )
             junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
@@ -52,11 +56,11 @@ node('docker-compose') {
         }
     }
     //docker tag to be used for build, push and run
-    def dockerTag = "${env.BUILD_NUMBER}-${short_commit}"
+    dockerTag = "${env.BUILD_NUMBER}-${SHORT_COMMIT}"
     //build image and deploy to staging
     stage('build docker image') {
         dir('target') {
-            mobileDepositUiImage = docker.build "beedemo/mobile-deposit-ui-stage:${dockerTag}"
+            mobileDepositUiImage = docker.build("beedemo/mobile-deposit-ui-stage:${dockerTag}", "--build-arg COMMIT_SHA=${SHORT_COMMIT} .")
         }
     }
 
@@ -80,7 +84,6 @@ if(env.BRANCH_NAME=="master") {//only deploy master branch to prod
 
     stage('deploy to production') {
         node('docker-cloud') {
-            def dockerTag = "${env.BUILD_NUMBER}-${short_commit}"
             sh "docker tag beedemo/mobile-deposit-ui-stage:${dockerTag} beedemo/mobile-deposit-ui:${dockerTag}"
             //use withDockerRegistry to make sure we are logged in to docker hub registry
             withDockerRegistry(registry: [credentialsId: 'docker-hub-beedemo']) {
