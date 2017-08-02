@@ -60,7 +60,7 @@ node('docker-compose') {
     //build image and deploy to staging
     stage('build docker image') {
         dir('target') {
-            mobileDepositUiImage = docker.build("beedemo/mobile-deposit-ui-stage:${dockerTag}", "--build-arg COMMIT_SHA=${SHORT_COMMIT}")
+            mobileDepositUiImage = docker.build("beedemo/mobile-deposit-ui-stage:${dockerTag}", "--build-arg COMMIT_SHA=${SHORT_COMMIT} .")
         }
     }
 
