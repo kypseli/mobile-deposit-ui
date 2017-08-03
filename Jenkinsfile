@@ -27,6 +27,7 @@ node('docker-compose') {
             echo "Released version ${buildVersion}"
         }
         matcher = null
+        stash name: 'jar-dockerfile', includes: '**/target/*.jar,**/target/Dockerfile'
     }
     stage('functional-test') {
         try {
@@ -56,10 +57,23 @@ node('docker-compose') {
             sh 'docker-compose down'
         }
     }
+}
+
+if(env.BRANCH_NAME!="master") {//must check firefox manually
+    stage('awaiting approval for staging') {
+        //put input step outside of node so it doesn't tie up a slave
+        timeout(time: 10, unit: 'MINUTES') {
+            input 'Do the screenshots look good?'
+        }
+    }
+}
+
+node('docker') {
     //docker tag to be used for build, push and run
     dockerTag = "${env.BUILD_NUMBER}-${SHORT_COMMIT}"
     //build image and deploy to staging
     stage('build docker image') {
+        unstash 'jar-dockerfile'
         dir('target') {
             mobileDepositUiImage = docker.build("beedemo/mobile-deposit-ui-stage:${dockerTag}", "--build-arg COMMIT_SHA=${SHORT_COMMIT} .")
         }
@@ -71,15 +85,6 @@ node('docker-compose') {
           mobileDepositUiImage.push()
         }
         dockerDeploy("docker-cloud","${DOCKER_HUB_USER}", 'mobile-deposit-ui-stage', 82, 8080, "$dockerTag")
-    }
-}
-
-if(env.BRANCH_NAME!="master") {//must check firefox manually
-    stage('awaiting approval for staging') {
-        //put input step outside of node so it doesn't tie up a slave
-        timeout(time: 10, unit: 'MINUTES') {
-            input 'Do the screenshots look good?'
-        }
     }
 }
 
