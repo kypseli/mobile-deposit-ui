@@ -98,6 +98,7 @@ public class MobileDepositFunctionalTests  {
 		assertNotNull(driver.findElement(By.className("account-number")));
 	}
 
+	/*
 	@Test
 	public void checkBannerImage() throws Exception {
 		String depositUrl = "http://" + testHost + ":" + port + "/deposit/";
@@ -119,6 +120,7 @@ public class MobileDepositFunctionalTests  {
 		}
 		assertTrue(ImagePresent);
 	}
+	*/
 
 	// @Test
 	// public void hasMaskedAccountNumber() throws Exception {
