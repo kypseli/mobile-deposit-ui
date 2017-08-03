@@ -5,9 +5,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.By;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +17,7 @@ import java.io.File;
 import java.net.URI;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 
 /**
@@ -41,8 +40,11 @@ public class MobileDepositFunctionalTests  {
     @Value("${test.browser.name}")
     private String testBrowserName;
 
-    @Value("${test.browser.version}")
-    private String testBrowserVersion;
+	@Value("${test.browser.version}")
+	private String testBrowserVersion;
+
+	@Value("${BUILD_NUMBER}")
+	private String buildNumber;
 
 
 	/**
@@ -96,10 +98,37 @@ public class MobileDepositFunctionalTests  {
 	public void hasAnAccountNumber() throws Exception {
 		String depositUrl = "http://" + testHost + ":" + port + "/deposit/";
 		driver.get(depositUrl);
+
+		//get screenshot to allow manual check for image
+		File screenshot = driver.getScreenshotAs(OutputType.FILE);
+		FileUtils.copyFile(screenshot, new File("./screenshot-hasAnAccountNumber-" + testBrowserName + "-" + testBrowserVersion + "--build-" +  buildNumber + ".png"));
+
 		assertNotNull(driver.findElement(By.className("account-number")));
-        File screenshot = driver.getScreenshotAs(OutputType.FILE);
-        FileUtils.copyFile(screenshot, new File("./screenshot-hasAnAccountNumber-" + testBrowserName + "-" + testBrowserVersion + ".png"));
 	}
+
+	/*
+	@Test
+	public void checkBannerImage() throws Exception {
+		String depositUrl = "http://" + testHost + ":" + port + "/deposit/";
+		driver.get(depositUrl);
+
+		//get screenshot to allow manual check for image
+		File screenshot = driver.getScreenshotAs(OutputType.FILE);
+		FileUtils.copyFile(screenshot, new File("./screenshot-checkBannerImage-" + testBrowserName + "-" + testBrowserVersion + ".png"));
+
+		Boolean ImagePresent = Boolean.TRUE;
+		//currently must manually test for firefox
+		if(testBrowserName != "firefox") {
+			try {
+				WebElement ImageFile = driver.findElement(By.xpath("//img[@id='jenkins-logo']"));
+				ImagePresent = (Boolean) ((JavascriptExecutor) driver).executeScript("return arguments[0].complete && typeof arguments[0].naturalWidth != \"undefined\" && arguments[0].naturalWidth > 0", ImageFile);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		assertTrue(ImagePresent);
+	}
+	*/
 
 	// @Test
 	// public void hasMaskedAccountNumber() throws Exception {
