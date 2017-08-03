@@ -107,7 +107,12 @@ public class MobileDepositFunctionalTests  {
 		File screenshot = driver.getScreenshotAs(OutputType.FILE);
 		FileUtils.copyFile(screenshot, new File("./screenshot-checkBannerImage-" + testBrowserName + "-" + testBrowserVersion + ".png"));
 
-		boolean isDisplayed = driver.findElement(By.xpath("//img[contains(@id,’jenkins-logo’)]")).isDisplayed();
+		boolean isDisplayed = false;
+		try {
+			isDisplayed = driver.findElement(By.id("jenkins-logo")).isDisplayed();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 		assertTrue(isDisplayed);
 	}
 
