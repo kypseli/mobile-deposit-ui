@@ -5,9 +5,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.By;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +17,7 @@ import java.io.File;
 import java.net.URI;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 
 /**
@@ -99,6 +98,16 @@ public class MobileDepositFunctionalTests  {
 		assertNotNull(driver.findElement(By.className("account-number")));
         File screenshot = driver.getScreenshotAs(OutputType.FILE);
         FileUtils.copyFile(screenshot, new File("./screenshot-hasAnAccountNumber-" + testBrowserName + "-" + testBrowserVersion + ".png"));
+	}
+
+	@Test
+	public void CheckImage() throws Exception {
+		String depositUrl = "http://" + testHost + ":" + port + "/deposit/";
+		driver.get(depositUrl);
+		WebElement ImageFile = driver.findElement(By.xpath("//img[contains(@id,'jenkins-logo')]"));
+
+		Boolean ImagePresent = (Boolean) driver.executeScript("return arguments[0].complete && typeof arguments[0].naturalWidth != \"undefined\" && arguments[0].naturalWidth > 0", ImageFile);
+		assertTrue(ImagePresent);
 	}
 
 	// @Test
