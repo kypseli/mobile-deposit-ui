@@ -107,13 +107,14 @@ public class MobileDepositFunctionalTests  {
 		File screenshot = driver.getScreenshotAs(OutputType.FILE);
 		FileUtils.copyFile(screenshot, new File("./screenshot-checkBannerImage-" + testBrowserName + "-" + testBrowserVersion + ".png"));
 
-		boolean isDisplayed = false;
+		Boolean ImagePresent = Boolean.FALSE;
 		try {
-			isDisplayed = driver.findElement(By.id("jenkins-logo")).isDisplayed();
-		} catch(Exception e) {
+			WebElement ImageFile = driver.findElement(By.xpath("//img[@id='jenkins-logo']"));
+			ImagePresent = (Boolean) ((JavascriptExecutor) driver).executeScript("return arguments[0].complete && typeof arguments[0].naturalWidth != \"undefined\" && arguments[0].naturalWidth > 0", ImageFile);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		assertTrue(isDisplayed);
+		assertTrue(ImagePresent);
 	}
 
 	// @Test
