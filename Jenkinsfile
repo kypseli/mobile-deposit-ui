@@ -35,16 +35,16 @@ node('docker-compose') {
             parallel(
                 "firefox": {
                     sh 'docker pull selenoid/firefox:50.0'
-                    sh 'docker run -i --rm -p 8081:8081 -v "$PWD":/usr/src/mobile-deposit-ui -v /data:/data  -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.browser.name=firefox -Dtest.browser.version=50.0 -Dserver.port=8081"'
+                    sh 'docker run -i --rm -p 8081:8081 -v "$PWD":/usr/src/mobile-deposit-ui -v /data:/data  -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.browser.name=firefox -Dtest.browser.version=50.0 -DBUILD_NUMBER=${BUILD_NUMBER} -Dserver.port=8081"'
                 },
 
                 "firefox-old": {
                     sh 'docker pull selenoid/firefox:46.0'
-                    sh 'docker run -i --rm -p 8082:8082 -v "$PWD":/usr/src/mobile-deposit-ui -v /data:/data  -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.browser.name=firefox -Dtest.browser.version=46.0 -Dserver.port=8082"'
+                    sh 'docker run -i --rm -p 8082:8082 -v "$PWD":/usr/src/mobile-deposit-ui -v /data:/data  -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.browser.name=firefox -Dtest.browser.version=46.0 -DBUILD_NUMBER=${BUILD_NUMBER} -Dserver.port=8082"'
                 },
                 "chrome": {
                     sh 'docker pull selenoid/chrome:59.0'
-                    sh 'docker run -i --rm -p 8083:8083 -v "$PWD":/usr/src/mobile-deposit-ui -v /data:/data  -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.browser.name=chrome -Dtest.browser.version=59.0 -Dserver.port=8083"'
+                    sh 'docker run -i --rm -p 8083:8083 -v "$PWD":/usr/src/mobile-deposit-ui -v /data:/data  -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.browser.name=chrome -Dtest.browser.version=59.0 -DBUILD_NUMBER=${BUILD_NUMBER} -Dserver.port=8083"'
                 }, failFast: true
             )
         } catch(x) {

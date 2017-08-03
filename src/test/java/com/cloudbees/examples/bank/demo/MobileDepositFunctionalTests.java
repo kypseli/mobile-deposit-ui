@@ -40,8 +40,11 @@ public class MobileDepositFunctionalTests  {
     @Value("${test.browser.name}")
     private String testBrowserName;
 
-    @Value("${test.browser.version}")
-    private String testBrowserVersion;
+	@Value("${test.browser.version}")
+	private String testBrowserVersion;
+
+	@Value("${BUILD_NUMBER}")
+	private String buildNumber;
 
 
 	/**
@@ -98,7 +101,7 @@ public class MobileDepositFunctionalTests  {
 
 		//get screenshot to allow manual check for image
 		File screenshot = driver.getScreenshotAs(OutputType.FILE);
-		FileUtils.copyFile(screenshot, new File("./screenshot-hasAnAccountNumber-" + testBrowserName + "-" + testBrowserVersion + ".png"));
+		FileUtils.copyFile(screenshot, new File("./screenshot-hasAnAccountNumber-" + testBrowserName + "-" + testBrowserVersion + "--build-" +  buildNumber + ".png"));
 
 		assertNotNull(driver.findElement(By.className("account-number")));
 	}
