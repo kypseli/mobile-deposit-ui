@@ -74,9 +74,19 @@ node('docker-compose') {
     }
 }
 
+if(env.BRANCH_NAME!="master") {//must check firefox manually
+    stage('awaiting approval for staging') {
+        //put input step outside of node so it doesn't tie up a slave
+        timeout(time: 10, unit: 'MINUTES') {
+            input 'Do the screenshots look good?'
+        }
+    }
+}
+
+
 if(env.BRANCH_NAME=="master") {//only deploy master branch to prod
 
-    stage('awaiting approval') {
+    stage('awaiting approval for prod deployment') {
         //put input step outside of node so it doesn't tie up a slave
         timeout(time: 10, unit: 'MINUTES') {
             input 'UI Staged at http://bank.beedemo.net:82/deposit - Proceed with Production Deployment?'
