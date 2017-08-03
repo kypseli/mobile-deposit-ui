@@ -54,6 +54,7 @@ node('docker-compose') {
             //capture results regardless of outcome
             junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
             archive "screenshot*.png"
+            sh 'rm -f screenshot*'
             sh 'docker-compose down'
         }
     }

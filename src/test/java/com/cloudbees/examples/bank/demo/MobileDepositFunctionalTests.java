@@ -95,6 +95,11 @@ public class MobileDepositFunctionalTests  {
 	public void hasAnAccountNumber() throws Exception {
 		String depositUrl = "http://" + testHost + ":" + port + "/deposit/";
 		driver.get(depositUrl);
+
+		//get screenshot to allow manual check for image
+		File screenshot = driver.getScreenshotAs(OutputType.FILE);
+		FileUtils.copyFile(screenshot, new File("./screenshot-hasAnAccountNumber-" + testBrowserName + "-" + testBrowserVersion + ".png"));
+
 		assertNotNull(driver.findElement(By.className("account-number")));
 	}
 
