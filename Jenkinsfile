@@ -6,10 +6,7 @@ def dockerTag = null
 
 env.DOCKER_HUB_USER = 'beedemo'
 env.DOCKER_CREDENTIAL_ID = 'docker-hub-beedemo'
-
-if(env.BRANCH_NAME=="master"){
-    properties([$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '1', daysToKeepStr: '', numToKeepStr: '5']]])
-}
+properties([$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '1', daysToKeepStr: '', numToKeepStr: '5']])
 
 node('docker') {
     checkout scm
@@ -86,7 +83,7 @@ node('docker') {
         withDockerRegistry(registry: [credentialsId: 'docker-hub-beedemo']) {
           mobileDepositUiImage.push()
         }
-        dockerDeploy("docker-cloud","${DOCKER_HUB_USER}", 'mobile-deposit-ui-stage', 82, 8080, "$dockerTag")
+        kubeDeploy('mobile-deposit-ui-stage', 'beedemo', "$dockerTag", "stage")
     }
 }
 
