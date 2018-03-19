@@ -13,12 +13,13 @@ if(env.BRANCH_NAME=="master"){
 }
 
 
-node('docker-compose') {
+node('docker') {
     checkout scm
     stage('build') {
         gitShortCommit(7)
-      
-        sh "docker run -i --rm -v ${WORKSPACE}:/usr/src/mobile-deposit-ui -v /data:/data -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo clean install -DskipTests -DGIT_COMMIT='${SHORT_COMMIT}' -DBUILD_NUMBER=${BUILD_NUMBER} -DBUILD_URL=${BUILD_URL}"
+        container('docker') {
+            sh "docker run -i --rm -v ${WORKSPACE}:/usr/src/mobile-deposit-ui -v /data:/data -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo clean install -DskipTests -DGIT_COMMIT='${SHORT_COMMIT}' -DBUILD_NUMBER=${BUILD_NUMBER} -DBUILD_URL=${BUILD_URL}"
+        }
 
         //get new version of application from pom
         def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
@@ -31,7 +32,9 @@ node('docker-compose') {
     }
     stage('functional-test') {
         try {
-            sh 'docker-compose up -d'
+            container('compose') {
+                sh 'docker-compose up -d'
+            }
             parallel(
                 "firefox": {
                     sh 'docker pull selenoid/firefox:50.0'
