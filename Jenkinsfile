@@ -8,10 +8,8 @@ env.DOCKER_HUB_USER = 'beedemo'
 env.DOCKER_CREDENTIAL_ID = 'docker-hub-beedemo'
 
 if(env.BRANCH_NAME=="master"){
-    properties([pipelineTriggers(triggers: [[$class: 'DockerHubTrigger', options: [[$class: 'TriggerOnSpecifiedImageNames', repoNames: ['beedemo/mobile-deposit-api'] as Set]]]]),
-                [$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '1', daysToKeepStr: '', numToKeepStr: '5']]])
+    properties([$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '1', daysToKeepStr: '', numToKeepStr: '5']]])
 }
-
 
 node('docker') {
     checkout scm
@@ -109,7 +107,7 @@ if(env.BRANCH_NAME=="master") {//only deploy master branch to prod
             withDockerRegistry(registry: [credentialsId: 'docker-hub-beedemo']) {
               sh "docker push beedemo/mobile-deposit-ui:${dockerTag}"
             }
-            dockerDeploy("docker-cloud","${DOCKER_HUB_USER}", 'mobile-deposit-ui', 80, 8080, "$dockerTag")
+            kubeDeploy('mobile-deposit-ui', "beedemo", "$dockerTag", 80, 8080)
         }
     }
 }
