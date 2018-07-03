@@ -8,12 +8,12 @@ env.DOCKER_HUB_USER = 'beedemo'
 env.DOCKER_CREDENTIAL_ID = 'docker-hub-beedemo'
 properties([$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '1', daysToKeepStr: '', numToKeepStr: '5']])
 
-node('docker') {
+node('default') {
     checkout scm
     stage('build') {
         gitShortCommit(7)
-        container('docker') {
-            sh "docker run -i --rm -v ${WORKSPACE}:/usr/src/mobile-deposit-ui -v /data:/data -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo clean install -DskipTests -DGIT_COMMIT='${SHORT_COMMIT}' -DBUILD_NUMBER=${BUILD_NUMBER} -DBUILD_URL=${BUILD_URL}"
+        container('maven-jdk8') {
+            sh "mvn clean install -DskipTests -DGIT_COMMIT='${SHORT_COMMIT}' -DBUILD_NUMBER=${BUILD_NUMBER} -DBUILD_URL=${BUILD_URL}"
         }
 
         //get new version of application from pom
@@ -27,22 +27,22 @@ node('docker') {
     }
     stage('functional-test') {
         try {
-            container('compose') {
-                sh 'docker-compose up -d'
-            }
             parallel(
                 "firefox": {
-                    sh 'docker pull selenoid/firefox:50.0'
-                    sh 'docker run -i --rm -p 8081:8081 -v "$PWD":/usr/src/mobile-deposit-ui -v /data:/data  -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.browser.name=firefox -Dtest.browser.version=50.0 -DBUILD_NUMBER=${BUILD_NUMBER} -Dserver.port=8081"'
+                    container(maven-jdk8) {
+                        sh 'mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.browser.name=firefox -Dtest.browser.version=58.0 -DBUILD_NUMBER=${BUILD_NUMBER} -Dserver.port=8081"'
+                    }
                 },
 
                 "firefox-old": {
-                    sh 'docker pull selenoid/firefox:46.0'
-                    sh 'docker run -i --rm -p 8082:8082 -v "$PWD":/usr/src/mobile-deposit-ui -v /data:/data  -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.browser.name=firefox -Dtest.browser.version=46.0 -DBUILD_NUMBER=${BUILD_NUMBER} -Dserver.port=8082"'
+                    container(maven-jdk8) {
+                        sh 'mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.browser.name=firefox -Dtest.browser.version=47.0 -DBUILD_NUMBER=${BUILD_NUMBER} -Dserver.port=8082"'
+                    }
                 },
                 "chrome": {
-                    sh 'docker pull selenoid/chrome:59.0'
-                    sh 'docker run -i --rm -p 8083:8083 -v "$PWD":/usr/src/mobile-deposit-ui -v /data:/data  -w /usr/src/mobile-deposit-ui maven:3.3-jdk-8 mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.browser.name=chrome -Dtest.browser.version=59.0 -DBUILD_NUMBER=${BUILD_NUMBER} -Dserver.port=8083"'
+                    container(maven-jdk8) {
+                        sh 'mvn -Dmaven.repo.local=/data/mvn/repo verify -DargLine="-Dtest.browser.name=chrome -Dtest.browser.version=65.0 -DBUILD_NUMBER=${BUILD_NUMBER} -Dserver.port=8083"'
+                    }
                 }, failFast: true
             )
         } catch(x) {
@@ -53,7 +53,6 @@ node('docker') {
             junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
             archive "screenshot*.png"
             sh 'rm -f screenshot*'
-            sh 'docker-compose down'
         }
     }
 }
@@ -66,26 +65,20 @@ if(env.BRANCH_NAME!="master") {//must check firefox manually
         }
     }
 }
-
-node('docker') {
     //docker tag to be used for build, push and run
     dockerTag = "${env.BUILD_NUMBER}-${SHORT_COMMIT}"
     //build image and deploy to staging
     stage('build docker image') {
-        unstash 'jar-dockerfile'
-        dir('target') {
-            mobileDepositUiImage = docker.build("beedemo/mobile-deposit-ui-stage:${dockerTag}", "--build-arg COMMIT_SHA=${SHORT_COMMIT} .")
+        dockerBuildPush('beedemo/mobile-deposit-ui', 'kaniko-3', 'target/.') {
+              unstash 'jar-dockerfile'
         }
     }
 
     stage('deploy to staging') {
-        //use withDockerRegistry to make sure we are logged in to docker hub registry
-        withDockerRegistry(registry: [credentialsId: 'docker-hub-beedemo']) {
-          mobileDepositUiImage.push()
-        }
-        kubeDeploy('mobile-deposit-ui-stage', 'beedemo', "$dockerTag", "stage")
+        echo "TODO"
+        //kubeDeploy('mobile-deposit-ui-stage', 'beedemo', "$dockerTag", "stage")
     }
-}
+
 
 
 if(env.BRANCH_NAME=="master") {//only deploy master branch to prod
@@ -97,7 +90,8 @@ if(env.BRANCH_NAME=="master") {//only deploy master branch to prod
         }
     }
 
-    stage('deploy to production') {
+   /* TODO - figure this out 
+     stage('deploy to production') {
         node('docker-cloud') {
             sh "docker tag beedemo/mobile-deposit-ui-stage:${dockerTag} beedemo/mobile-deposit-ui:${dockerTag}"
             //use withDockerRegistry to make sure we are logged in to docker hub registry
@@ -106,5 +100,5 @@ if(env.BRANCH_NAME=="master") {//only deploy master branch to prod
             }
             kubeDeploy('mobile-deposit-ui', "beedemo", "$dockerTag", 80, 8080)
         }
-    }
+    } */
 }
