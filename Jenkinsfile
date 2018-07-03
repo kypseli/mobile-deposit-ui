@@ -16,8 +16,8 @@ pipeline {
       }
     }
     stage('functional-test') {
+      failFast true
       parallel {
-        failFast true
         stage('"firefox') {
           steps {
             container(maven-jdk8) {
