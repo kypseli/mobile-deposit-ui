@@ -45,14 +45,18 @@ pipeline {
 
     //build image and deploy to staging
     stage('build docker image') {
+      steps {
         dockerBuildPush('beedemo/mobile-deposit-ui', 'kaniko-1', 'target/.') {
               unstash 'jar-dockerfile'
         }
+      }
     }
 
     stage('deploy to staging') {
+      steps {
         echo "TODO"
         //kubeDeploy('mobile-deposit-ui-stage', 'beedemo', "$dockerTag", "stage")
+      }
     }
   }
 }
