@@ -21,7 +21,7 @@ pipeline {
         stage('"firefox') {
           steps {
             container('maven-jdk8') {
-                sh 'mvn verify -DargLine="-Dtest.connection.url=http://100.96.17.160:4444/wd/hub -Dtest.browser.name=firefox -Dtest.browser.version=58.0 -DBUILD_NUMBER=${BUILD_NUMBER} -Dserver.port=8081"'
+                sh 'mvn verify -DargLine="-Dtest.connection.url=http://moon.jenkins-agents:30630/wd/hub -Dtest.browser.name=firefox -Dtest.browser.version=58.0 -DBUILD_NUMBER=${BUILD_NUMBER} -Dserver.port=8081"'
             }
           }
         }
@@ -29,14 +29,14 @@ pipeline {
         stage('firefox-old') {
           steps {
             container('maven-jdk8') {
-                sh 'mvn verify -DargLine="-Dtest.connection.url=http://100.96.17.160:4444/wd/hub -Dtest.browser.name=firefox -Dtest.browser.version=47.0 -DBUILD_NUMBER=${BUILD_NUMBER} -Dserver.port=8082"'
+                sh 'mvn verify -DargLine="-Dtest.connection.url=http://moon.jenkins-agents:30630/wd/hub -Dtest.browser.name=firefox -Dtest.browser.version=47.0 -DBUILD_NUMBER=${BUILD_NUMBER} -Dserver.port=8082"'
             }
           }
         }
         stage('chrome') {
           steps {
             container('maven-jdk8') {
-                sh 'mvn verify -DargLine="-Dtest.connection.url=http://100.96.17.160:4444/wd/hub -Dtest.browser.name=chrome -Dtest.browser.version=65.0 -DBUILD_NUMBER=${BUILD_NUMBER} -Dserver.port=8083"'
+                sh 'mvn verify -DargLine="-Dtest.connection.url=http://moon.jenkins-agents:30630/wd/hub -Dtest.browser.name=chrome -Dtest.browser.version=65.0 -DBUILD_NUMBER=${BUILD_NUMBER} -Dserver.port=8083"'
             }
           }
         }
